@@ -31,6 +31,7 @@ def runall(model):
          
     fusion = Fuser(model)
      
+    repMan = ReportManager(fusion)
     start1 = time.time()
     
     fusion.runseq()
@@ -38,12 +39,10 @@ def runall(model):
     gc.collect()
     end1 = time.time() - start1
     print('\n     Processed in {0} seconds'.format(str(end1)))
-    repMan = ReportManager(fusion)
-    if fusion.last==False:
-        repMan.reportDetails()
-        repMan.reportAggregation()
-    else:
-        print(fusion.bestStickers())
+    
+    repMan.reportDetails()
+    repMan.reportAggregation()
+    
     gc.collect()
     
 

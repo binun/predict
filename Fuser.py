@@ -60,42 +60,9 @@ class Fuser(object):
         self.log=dataManager.datasource+'_optimal.txt'
         self.logI=dataManager.datasource+'_optconfigs.txt'
         self.f=None
-        self.last=False
-        if os.path.exists(self.log):
-           self.last = Configuration.online
     
     def setReportMan(self,rm):
         self.repman=rm
-    
-    def save(self):
-        for p in self.predictorList:
-            p.save()
-    
-    def restore(self):
-        for p in self.predictorList:
-            p.restore()
-        
-        for p in self.predictorList:
-            try:
-                os.remove(p.name+'_hits.txt')
-            except:
-                pass
-            try:
-                os.remove(p.name+'_skips.txt')
-            except:
-                pass
-            try:
-                os.remove(p.name+'_preds.txt')
-            except:
-                pass
-            try:
-                os.remove(p.name+'_conf.txt')
-            except:
-                pass
-            try:
-                os.remove(p.name+'_nconf.txt')
-            except:
-                pass
         
     def reset(self,since=None,until=None):
         for p in self.predictorList:
@@ -128,25 +95,6 @@ class Fuser(object):
         
         datas = self.dataManager.datesList[Configuration.seloffset:]
         
-        if self.last:
-            df=pandas.read_csv(self.log,header=None,float_precision='high')
-            optconfig=df.values[0]
-            Configuration.goodStickerProb = optconfig[0]
-            Configuration.metrhistlen = int(optconfig[1])
-            Configuration.fushistlen = int(optconfig[2])
-            Configuration.histlens["seq"] = int(optconfig[3])
-            Configuration.bestCount=int(optconfig[4])
-            Configuration.WL = optconfig[5]
-            
-            #self.restore()
-            self.dataManager.mockDay()
-            since=datas[-1]
-            
-            self.runAll(since,None)
-            os.remove(self.log)
-            return
-            
-       
         splitpoints=[None]
         periods=int(len(datas)/ndays)
         
@@ -231,10 +179,9 @@ class Fuser(object):
         msg=','.join(map(str,optconfig))
         print(msg)
         
-        if self.last==False:
-            self.f=open(self.log,'wt')
-            self.f.write(msg+'\n')
-            self.f.close()
+        self.f=open(self.log,'wt')
+        self.f.write(msg+'\n')
+        self.f.close()
         
         self.reset(since,until)
         self.runAll(since,until)
@@ -354,10 +301,11 @@ class Fuser(object):
                 self.detaildistr[timestamp] = ' '.join(ds1) 
                 self.deltagain[timestamp] = av/len(goodList_f)
                 
-                if Configuration.online==False and self.dataManager.switchedMonth(timestamp):
-                    print(timestamp + ' REPORT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                if Configuration.train==False and Configuration.online==False and self.dataManager.switchedMonth(timestamp):
                     
-                    self.reportPoint = None
+                    print(timestamp + ' REPORT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                    self.repman.reportAggregation(self.reportPoint,timestamp)
+                    self.reportPoint = timestamp
                 
                 del gainMsgSorted
                 del gainMessages

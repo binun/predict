@@ -36,7 +36,7 @@ class Configuration:
     decay=False
     train=False
     minstickers=0.05
-    WL=0.4
+
     
     online=True
 

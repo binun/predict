@@ -25,6 +25,9 @@ class ReportManager(object):
         if len(Configuration.prefix)>0:
             self.dir = self.dir+'__'+Configuration.prefix
         
+        if not os.path.exists(self.dir):
+            os.makedirs(self.dir)
+        
         self.fusionCalculated=[]
         self.predictors = fusion.predictorList
         
@@ -121,13 +124,13 @@ class ReportManager(object):
     def reportDetails(self):
         detpath = os.path.join(self.dir,"details")
          
-        if not os.path.exists(detpath):
-            os.makedirs(detpath)
+#         if not os.path.exists(detpath):
+#             os.makedirs(detpath)
             
             
-        for pred in self.predictors:
+        #for pred in self.predictors:
                       
-            sticker = pred.stickers[0]
+            #sticker = pred.stickers[0]
 #             try:
 #                 self.reportDetail(detpath,sticker,pred)
 #             except:
@@ -135,14 +138,24 @@ class ReportManager(object):
     
     def reportAggregation(self,since=None,until=None):
         
-        print('Aggregation started')
         log=self.log
-        if until is not None:
+        tstamps = self.engine.dataManager.datesList
+        if since is None:
+            s = self.startOffset
+        else:
+            s = tstamps.index(since)
+        
+        if until is None:
+            u = len(tstamps)
+        else:
+            u = tstamps.index(until)
             mon = until.split('-')[1]
-            log=mon+log
+            log=os.path.join(self.dir, mon+"_aggregation.csv")
             
         
-        tstamps = self.engine.dataManager.datesList[self.startOffset:]
+        
+        print('Aggregation started')
+        tstamps = tstamps[s:u]
         predGainCaptions = ['G_'+s.name for s in self.predictors]
         predSuccCaptions = ['SR_'+s.name for s in self.predictors]
         predConfCaptions = ['C_'+s.name for s in self.predictors]
@@ -157,7 +170,7 @@ class ReportManager(object):
         
         posdeltas=0
         negdeltas=0
-        with open(log, 'w') as f:
+        with open(log, 'wt') as f:
             
             f.write(aheader)
             stillzeros=True

@@ -34,10 +34,9 @@ class OfflineDataManager(DataManager.DataManager):
         s=set()
         
         for sticker in self.stickers:            
-            #if 'sandp' in self.datasource or :  
+           
             m=self.fetchSPStickerData(sticker)
-            #else:
-                #m=self.fetchStickerData(sticker)
+            
                 
                 
             if m is not None:
@@ -140,7 +139,7 @@ class OfflineDataManager(DataManager.DataManager):
         
         origl = list(np.items())
         l = len(origl)
-        #np = dict(origl[0:(l-10)])
+        #np = dict(origl[0:(l-1)])
         
         return np
             
