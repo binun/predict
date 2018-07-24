@@ -38,15 +38,14 @@ def runall(model):
     gc.collect()
     end1 = time.time() - start1
     print('\n     Processed in {0} seconds'.format(str(end1)))
-    
+    repMan = ReportManager(fusion)
     if fusion.last==False:
-        repMan = ReportManager(fusion)
         repMan.reportDetails()
         repMan.reportAggregation()
     else:
         print(fusion.bestStickers())
     gc.collect()
-     
+    
 
 warnings.filterwarnings("ignore")
 atexit.register(cleaner)
@@ -67,6 +66,7 @@ if not os.path.exists(index):
     index = d.dir
 
 model=OfflineDataManager(index)
+
 runall(model)
 
 

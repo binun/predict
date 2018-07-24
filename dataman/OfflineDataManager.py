@@ -140,7 +140,7 @@ class OfflineDataManager(DataManager.DataManager):
         
         origl = list(np.items())
         l = len(origl)
-        np = dict(origl[0:(l-10)])
+        #np = dict(origl[0:(l-10)])
         
         return np
             

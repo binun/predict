@@ -38,5 +38,5 @@ class Configuration:
     minstickers=0.05
     WL=0.4
     
-    online=False
+    online=True
 

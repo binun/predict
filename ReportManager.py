@@ -18,6 +18,7 @@ class ReportManager(object):
     def __init__(self, fusion):
         
         self.engine = fusion
+        self.engine.setReportMan(self)
         
         self.now=time.strftime(Configuration.timestamp_format)
         self.dir="output_{0}_{1}".format(self.engine.dataManager.datasource,str(self.now))
@@ -36,6 +37,45 @@ class ReportManager(object):
         self.lastMessage = ''
     
 
+    def updateMaillog(self):
+        model = self.engine.dataManager
+        df=None
+        try:
+            df = pandas.read_csv("maillog.csv",header=None)
+        except:
+            return
+        hist = df.values
+
+        f = open(self.actlog,'wt')
+        for histitem in hist:
+            td = pandas.Timestamp(histitem[0])
+            tds = td.strftime("%Y-%m-%d")
+            predictions = str(histitem[2]).replace(':',' ').split(' ')
+            li = predictions.index("Longs")
+            si = predictions.index("Shorts")
+            sum=0
+            count=0
+            for i in range(li+1,si):
+                sticker = predictions[i]
+                try:
+                    sum = sum+model.getAt(sticker,'close',tds)
+                    count=count+1
+                except:
+                    continue
+    
+            for i in range(si+1,len(predictions)):
+                sticker = predictions[i]
+                try:
+                    sum = sum-model.getAt(sticker,'close',tds)
+                    count=count+1
+                except:
+                    continue
+    
+            av = 0
+            if count>0:
+                av= sum/count
+            f.write('{0},{1},{2}\n'.format(tds,str(av),histitem[2]))
+        f.close()
     
     def reportDetail(self,detpath,sticker,pred):
 
@@ -93,9 +133,14 @@ class ReportManager(object):
 #             except:
 #                 traceback.print_exc()
     
-    def reportAggregation(self):
+    def reportAggregation(self,since=None,until=None):
         
         print('Aggregation started')
+        log=self.log
+        if until is not None:
+            mon = until.split('-')[1]
+            log=mon+log
+            
         
         tstamps = self.engine.dataManager.datesList[self.startOffset:]
         predGainCaptions = ['G_'+s.name for s in self.predictors]
@@ -112,7 +157,7 @@ class ReportManager(object):
         
         posdeltas=0
         negdeltas=0
-        with open(self.log, 'w') as f:
+        with open(log, 'w') as f:
             
             f.write(aheader)
             stillzeros=True
@@ -197,61 +242,13 @@ class ReportManager(object):
             
         del fusgains
         del tstamps
-        
-        with open(self.actlog, 'a') as fa:
-            td = pandas.Timestamp(datetime.datetime.now())+BDay(1)
+        if Configuration.online==True:
+            with open(self.actlog, 'a') as fa:
+                td = pandas.Timestamp(datetime.datetime.now())+BDay(1)
             
-            addt='{0},{1}\n'.format(td.strftime("%b-%d-%Y"),self.lastMessage)
-            fa.write(addt)
-            fa.close()
-            
-            
-#         with open(self.predlog, 'w') as fp:
-#             ls = ' '.join(longs)+"\n"
-#             ss = ' '.join(shorts)+"\n"
-#             fp.write(ls)
-#             fp.write(ss)
-#             fp.close()
-#             
-#         if Configuration.twsactive:
-#             longs_with_vals=[]
-#             shorts_with_vals=[]
-#             
-#             for l in longs:
-#                 v = str(self.engine.dataManager.getDataset().getAt(l,'close',None))
-#                 longs_with_vals.append('{0}:{1}'.format(l,v))
-#         
-#             for s in shorts:
-#                 v = str(self.engine.dataManager.getDataset().getAt(s,'close',None))
-#                 shorts_with_vals.append('{0}:{1}'.format(s,v))
-#             
-#             increment=0
-#             fr = open(self.actlog,'r')
-#             plines = fr.readlines()
-#             fr.close()
-#             pp = plines[-1].split(',')
-#           
-#             prev_longs = pp[1].split('_')
-#             prev_shorts = pp[2].split('_')
-#             for pl in prev_longs:
-#                 [sticker,prev_close] = pl.split(':')
-#                 now_close = self.engine.dataManager.getDataset().getAt(sticker,'close',None)
-#                 increment = increment + (now_close-float(prev_close))/float(prev_close)
-#                 
-#             for ps in prev_shorts:
-#                 [sticker,prev_close] = ps.split(':')
-#                 now_close = self.engine.dataManager.getDataset().getAt(sticker,'close',None)
-#                 increment = increment - (now_close-float(prev_close))/float(prev_close)
-#             increment = increment / (len(prev_longs)+len(prev_shorts))
-#         
-#             with open(self.actlog, 'a') as fa:
-#                 td = datetime.datetime.now()
-#                 addt='{0},{1},{2},{3}\n'.format(td.strftime("%b-%d-%Y"),'_'.join(longs_with_vals),'_'.join(shorts_with_vals),str(increment))
-#                 fa.write(addt)
-#                 fa.close()
-#         
-#             os.system('java -jar mailer.jar {0}'.format(self.predlog))
+                addt='{0},{1},{2}\n'.format(td.strftime("%b-%d-%Y"),'0',self.lastMessage)
+                fa.write(addt)
+                fa.close()
         
+            self.updateMaillog()
             
-        
-        

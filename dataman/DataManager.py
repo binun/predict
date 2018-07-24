@@ -44,6 +44,20 @@ class DataManager():
         tm = ts.strftime('%Y-%b-%d')
         self.datesList.append(tm)
         self.dataset.mockDay(tm)
+    
+    def switchedMonth(self,timestamp):
+        ti = None
+        try:
+            ti=self.datesList.index(timestamp)
+        except:
+            return False
+        
+        if ti<10:
+            return False
+        prev_day = self.datesList[ti-1]
+        cur_month = timestamp.split('-')[1]
+        prev_month = prev_day.split('-')[1]
+        return (cur_month!=prev_month)
         
     def getDataset(self):
         

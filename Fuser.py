@@ -38,7 +38,8 @@ class Fuser(object):
         self.invert=1
         self.metric=[]
         self.currentMetric=[]
-
+        self.repman = None
+        self.reportPoint=None
         
         for st in dataManager.stickers:
             sp = sticker_fusionPredictor(dataManager,st,context=None,fusMethod=Configuration.deffustype)
@@ -62,6 +63,9 @@ class Fuser(object):
         self.last=False
         if os.path.exists(self.log):
            self.last = Configuration.online
+    
+    def setReportMan(self,rm):
+        self.repman=rm
     
     def save(self):
         for p in self.predictorList:
@@ -134,7 +138,7 @@ class Fuser(object):
             Configuration.bestCount=int(optconfig[4])
             Configuration.WL = optconfig[5]
             
-            self.restore()
+            #self.restore()
             self.dataManager.mockDay()
             since=datas[-1]
             
@@ -153,9 +157,7 @@ class Fuser(object):
         for i in range(0,len(splitpoints)-1):
             today = splitpoints[i]
             tomorrow = splitpoints[i+1]
-            Configuration.train=True
             self.trainRun(today,tomorrow)
-            Configuration.train=False
             
         #if Configuration.online==True:
             #self.save()
@@ -183,7 +185,8 @@ class Fuser(object):
 #         bestcounts_s=[0.1]
         
         optconfig=[Configuration.goodStickerProb,Configuration.metrhistlen,Configuration.fushistlen,80,Configuration.bestCountL,Configuration.bestCountS]
-        self.metric.clear()    
+        self.metric.clear()
+        Configuration.train=True    
         for seqhist,fushist,minprob,selhist,bestcountl,bestcounts in product(seqhists,fushists,minprobs,selhists,bestcounts_l,bestcounts_s):
             
             if bestcountl+bestcounts==0 and len(bestcounts_l)>1 and len(bestcounts_s)>1:
@@ -215,7 +218,9 @@ class Fuser(object):
             else:
                 print(' ')
                 
-            
+        
+        Configuration.train=False
+        
         Configuration.goodStickerProb = optconfig[0]
         Configuration.metrhistlen = optconfig[1]
         Configuration.fushistlen = optconfig[2]
@@ -349,12 +354,16 @@ class Fuser(object):
                 self.detaildistr[timestamp] = ' '.join(ds1) 
                 self.deltagain[timestamp] = av/len(goodList_f)
                 
+                if Configuration.online==False and self.dataManager.switchedMonth(timestamp):
+                    print(timestamp + ' REPORT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                    
+                    self.reportPoint = None
+                
                 del gainMsgSorted
                 del gainMessages
                 
             del goodList_f     
             del goodList
-        
              
         
     def runAll(self,since=None,until=None):
