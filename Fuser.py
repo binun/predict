@@ -417,4 +417,3 @@ class Fuser(object):
             return self.historyGain(timestamp, depth)<0
         else:
             return self.historyReputation(timestamp, depth)<=0.4
-    

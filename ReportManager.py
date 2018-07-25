@@ -264,4 +264,4 @@ class ReportManager(object):
                 fa.close()
         
             self.updateMaillog()
-            
+                        
