@@ -6,7 +6,6 @@ from Service.Utilities import Tools
 import numpy
 import pandas
 
-from mlxtend.classifier import StackingCVClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model.logistic import LogisticRegression
 from sklearn.svm import SVC

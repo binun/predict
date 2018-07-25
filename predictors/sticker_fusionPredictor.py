@@ -4,8 +4,6 @@ import os
 from Service.Utilities import Tools
 from Configuration import Configuration
 from predictors.bernoulliPredictor import bernoulliPredictor
-from predictors.armaPredictor import armaPredictor
-from predictors.dlPredictor import dlPredictor
 from predictors.fusionPredictor import fusionPredictor
 from heapq import nlargest
 import re
