@@ -34,7 +34,8 @@ class ReportManager(object):
         self.log = os.path.join(self.dir, "aggregation.csv")
         self.pict=os.path.join(self.dir, "fusion.png")
         self.predlog = Configuration.predfile
-        self.actlog = "maillog.csv"
+        dsname = self.engine.dataManager.datasource.split("_")[0]
+        self.actlog = dsname+"_maillog.csv"
         
         self.startOffset = self.engine.startOffset           
         self.lastMessage = ''
@@ -44,7 +45,7 @@ class ReportManager(object):
         model = self.engine.dataManager
         df=None
         try:
-            df = pandas.read_csv("maillog.csv",header=None)
+            df = pandas.read_csv(self.actlog,header=None)
         except:
             return
         hist = df.values

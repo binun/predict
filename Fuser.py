@@ -258,8 +258,8 @@ class Fuser(object):
                 goodLong = list(filter(lambda pred: pred.getPrediction(timestamp,pred.sticker())>0, goodList_f))
                 goodShort = list(filter(lambda pred: pred.getPrediction(timestamp,pred.sticker())<0, goodList_f))
                  
-                goodLong = sorted(goodLong,key=lambda p:p.historyGain(timestamp,p.sticker(),depth=50))
-                goodShort = sorted(goodShort,key=lambda p:p.historyGain(timestamp,p.sticker(),depth=50))
+                goodLong = sorted(goodLong,key=lambda p:p.historyGain(timestamp,p.sticker(),depth=7))
+                goodShort = sorted(goodShort,key=lambda p:p.historyGain(timestamp,p.sticker(),depth=7))
                  
                 L=goodLong[-wanted_long:]
                 S=goodShort[-wanted_short:]
